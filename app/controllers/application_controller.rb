@@ -13,6 +13,6 @@ class ApplicationController < ActionController::Base
 
   def stringEncoding(input)
     new_string = Base64.encode64(input).encode('utf-8')
-    return input
+    return new_string
   end
 end
