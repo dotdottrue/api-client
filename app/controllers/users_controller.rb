@@ -48,9 +48,9 @@ class UsersController < ApplicationController
     response = HTTParty.post("#{Webclient::Application::WEBSERVICE_URL}",
               :body => { :name => @user.name,
                          :salt_masterkey => salt_masterkey,
-                         :pubkey_user => keys.public_key.to_s
+                         :pubkey_user => keys.public_key.to_s,
                          :privkey_user_enc => stringEncoding(privkey_user_enc)
-                        }.to_json
+                        }.to_json,
               :headers => { 'Content-Type' => 'application/json' })
 
 
