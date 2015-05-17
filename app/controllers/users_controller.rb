@@ -54,9 +54,11 @@ class UsersController < ApplicationController
               :headers => { 'Content-Type' => 'application/json'})
 
 
-    respond_to do |format|
+    #respond_to do |format|
       #add status codes etc
-    end
+      # format.html { redirect_to @user, notice: 'User was successfully updated.' }
+        #format.json { render :show, status: :ok, location: @user }
+    #end
   end
 
   # PATCH/PUT /users/1
