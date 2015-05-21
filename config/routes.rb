@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   post 'login' => 'user_session#create'
 
-  get 'logout' => 'user_session#log_out'
+  get 'logout' => 'user_session#destroy', :as => 'log_out'
 
   resources :users
 

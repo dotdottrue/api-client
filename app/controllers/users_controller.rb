@@ -27,10 +27,6 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       log_in @user
-      flash[:success] = "Welcome to our Message App"
-      redirect_to @user
-    else
-      render 'new'
     end
 
     salt_masterkey = OpenSSL::Random.random_bytes 64
@@ -42,23 +38,33 @@ class UsersController < ApplicationController
     masterkey = OpenSSL::PKCS5.pbkdf2_hmac(user_params[:password], salt_masterkey, iteration, 256, digest)
 
     keys = OpenSSL::PKey::RSA.new 2048
-    cipher = OpenSSL::Cipher.new 'AES-128-CBC'
-    privkey_user_enc = keys.export cipher, masterkey
+    privkey_user = keys.to_pem
 
-    response = HTTParty.post("#{Webclient::Application::WEBSERVICE_URL}",
+    cipher = OpenSSL::Cipher.new('AES-128-ECB')
+    cipher.encrypt
+    cipher.key = masterkey
+    privkey_user_enc = cipher.update(privkey_user) + cipher.final
+
+    response = HTTParty.post("http://#{Webclient::Application::WEBSERVICE_URL}/",
               :body => { :name => @user.name,
                          :salt_masterkey => stringEncoding(salt_masterkey),
-                         :pubkey_user => keys.public_key.to_s,
+                         :pubkey_user => stringEncoding(keys.public_key.to_pem),
                          :privkey_user_enc => stringEncoding(privkey_user_enc)
                         }.to_json,
               :headers => { 'Content-Type' => 'application/json'})
 
 
-    #respond_to do |format|
+    respond_to do |format|
+      if @user.present?
       #add status codes etc
-      # format.html { redirect_to @user, notice: 'User was successfully updated.' }
-        #format.json { render :show, status: :ok, location: @user }
-    #end
+        format.html { redirect_to @user, notice: 'User was successfully created.' }
+        format.json { render :show, status: :ok, location: @user }
+      else
+        #fehler beim erstellen des Users
+        format.html { render :new }
+        format.json { render json: @user.errors, status: :unprocessable_entity }
+      end
+    end
   end
 
   # PATCH/PUT /users/1
