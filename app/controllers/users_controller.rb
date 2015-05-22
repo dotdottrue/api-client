@@ -26,7 +26,8 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      log_in @user
+      log_in(@user)
+      #redirect_to messages_url, :notice => "Willkommen #{@user.name}"
     end
 
     salt_masterkey = OpenSSL::Random.random_bytes 64

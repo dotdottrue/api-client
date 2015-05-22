@@ -1,4 +1,5 @@
 module UserSessionHelper
+
   #user log in
   def log_in(user)
     session[:user_id] = user.id
@@ -11,6 +12,7 @@ module UserSessionHelper
 
   def log_out
     session[:user_id] = nil
-    current_user = nil
+    @current_user = nil
+    redirect_to ''
   end
 end
