@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
     return new_string
   end
 
-  def stringDencoding(input)
+  def stringDecoding(input)
     new_string = Base64.strict_decode64(input)
     return new_string
   end
