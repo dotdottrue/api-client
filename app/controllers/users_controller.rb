@@ -28,44 +28,45 @@ class UsersController < ApplicationController
     if @user.save
       log_in(@user)
       #redirect_to messages_url, :notice => "Willkommen #{@user.name}"
+      salt_masterkey = OpenSSL::Random.random_bytes 64
+
+      iteration = 10000
+
+      digest = OpenSSL::Digest::SHA256.new
+
+      masterkey = OpenSSL::PKCS5.pbkdf2_hmac(user_params[:password], salt_masterkey, iteration, 256, digest)
+
+      keys = OpenSSL::PKey::RSA.new 2048
+      privkey_user = keys.to_pem
+
+      cipher = OpenSSL::Cipher.new('AES-128-ECB')
+      cipher.encrypt
+      cipher.key = masterkey
+      privkey_user_enc = cipher.update(privkey_user) + cipher.final
+
+      response = HTTParty.post("http://#{Webclient::Application::WEBSERVICE_URL}/",
+                :body => { :name => @user.name,
+                           :salt_masterkey => stringEncoding(salt_masterkey),
+                           :pubkey_user => stringEncoding(keys.public_key.to_pem),
+                           :privkey_user_enc => stringEncoding(privkey_user_enc)
+                          }.to_json,
+                :headers => { 'Content-Type' => 'application/json'})
+
+    else
+      redirect_to new_user_path
     end
 
-    salt_masterkey = OpenSSL::Random.random_bytes 64
-
-    iteration = 10000
-
-    digest = OpenSSL::Digest::SHA256.new
-
-    masterkey = OpenSSL::PKCS5.pbkdf2_hmac(user_params[:password], salt_masterkey, iteration, 256, digest)
-
-    keys = OpenSSL::PKey::RSA.new 2048
-    privkey_user = keys.to_pem
-
-    cipher = OpenSSL::Cipher.new('AES-128-ECB')
-    cipher.encrypt
-    cipher.key = masterkey
-    privkey_user_enc = cipher.update(privkey_user) + cipher.final
-
-    response = HTTParty.post("http://#{Webclient::Application::WEBSERVICE_URL}/",
-              :body => { :name => @user.name,
-                         :salt_masterkey => stringEncoding(salt_masterkey),
-                         :pubkey_user => stringEncoding(keys.public_key.to_pem),
-                         :privkey_user_enc => stringEncoding(privkey_user_enc)
-                        }.to_json,
-              :headers => { 'Content-Type' => 'application/json'})
-
-
-    respond_to do |format|
-      if @user.present?
-      #add status codes etc
-        format.html { redirect_to @user, notice: 'User was successfully created.' }
-        format.json { render :show, status: :ok, location: @user }
-      else
-        #fehler beim erstellen des Users
-        format.html { render :new }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
-      end
-    end
+    # respond_to do |format|
+    #   if @user.present?
+    #   #add status codes etc
+    #     format.html { redirect_to @user, notice: 'User was successfully created.' }
+    #     format.json { render :show, status: :ok, location: @user }
+    #   else
+    #     #fehler beim erstellen des Users
+    #     format.html { render :new }
+    #     format.json { render json: @user.errors, status: :unprocessable_entity }
+    #   end
+    # end
   end
 
   # PATCH/PUT /users/1
