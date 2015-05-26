@@ -12,8 +12,12 @@
   <% end %>
 
   <div class="field">
+    <%= f.label :recipient %><br>
+    <%= f.select(:recipient, @recipients)%>
+  </div>
+  <div class="field">
     <%= f.label :sender %><br>
-    <%= f.text_field :sender %>
+    <%= f.text_field :sender, :value => current_user.name.downcase %>
   </div>
   <div class="field">
     <%= f.label :message %><br>

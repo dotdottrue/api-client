@@ -4,24 +4,29 @@ class UserSessionController < ApplicationController
 
   def create
   	@user = User.find_by(name: params[:user_session][:name].downcase)
-  	if @user && @user.authenticate(params[:user_session][:password])
+    if @user && @user.authenticate(params[:user_session][:password])
       log_in(@user)
 
-      response = HTTParty.get("http://#{Webclient::Application::WEBSERVICE_URL}/#{user.name}")
+      response = HTTParty.get("http://#{$SERVER_IP}/#{@user.name}")
 
       iteration = 10000
 
       digest = OpenSSL::Digest::SHA256.new
 
-      masterkey = OpenSSL::PKCS5.pbkdf2_hmac(user_params[:password], stringDecoding(response["salt_masterkey"]), iteration, 256, digest)
+      masterkey = OpenSSL::PKCS5.pbkdf2_hmac(params[:user_session][:password], stringDecoding(response["salt_masterkey"]), iteration, 256, digest)
 
       $pubkey_user = stringDecoding(response["pubkey_user"])
 
-      decipher = OpenSSL::Cipher.new('AES-128-ECB')
+      decipher = OpenSSL::Cipher::AES.new(128, :ECB)
       decipher.decrypt
+      decipher.padding = 0
       decipher.key = masterkey
-      $privkey_user = cipher.update(stringDecoding(response["privkey_user_enc"])) + decipher.final
-  
+
+      privkey_user_enc_plane = stringDecoding(response["privkey_user_enc"])
+      privkey_user_enc = decipher.update(privkey_user_enc_plane) + decipher.final
+    
+      $privkey_user = OpenSSL::PKey::RSA.new(privkey_user_enc, masterkey)
+
   		redirect_to messages_url, :notice => "Willkommen, #{@user.name}"  
   	else
   		redirect_to root_url, :notice => "User name or password doesn't match!!"

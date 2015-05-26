@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   helper_method :current_user
 
   def current_user
-    @current_user ||= User.find_by(id: user_session[:user_id])
+    User.where(id: session[:user_id]).first
   end
 
 	def authenticate
@@ -26,4 +26,13 @@ class ApplicationController < ActionController::Base
     new_string = Base64.strict_decode64(input)
     return new_string
   end
+
+  def getRecipients
+    response = HTTParty.get("http://#{$SERVER_IP}/")
+    @recipients = []
+    response.each do |recipient|
+      @recipients << recipient["slug"]
+    end
+  end
+
 end

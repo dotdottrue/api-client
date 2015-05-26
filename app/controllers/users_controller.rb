@@ -27,7 +27,7 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       log_in(@user)
-      #redirect_to messages_url, :notice => "Willkommen #{@user.name}"
+      
       salt_masterkey = OpenSSL::Random.random_bytes 64
 
       iteration = 10000
@@ -37,21 +37,21 @@ class UsersController < ApplicationController
       masterkey = OpenSSL::PKCS5.pbkdf2_hmac(user_params[:password], salt_masterkey, iteration, 256, digest)
 
       keys = OpenSSL::PKey::RSA.new 2048
-      privkey_user = keys.to_pem
+      $PRIVKEY_USER = keys.to_pem
 
       cipher = OpenSSL::Cipher.new('AES-128-ECB')
       cipher.encrypt
       cipher.key = masterkey
-      privkey_user_enc = cipher.update(privkey_user) + cipher.final
+      privkey_user_enc = cipher.update($PRIVKEY_USER) + cipher.final
 
-      response = HTTParty.post("http://#{Webclient::Application::WEBSERVICE_URL}/",
+      response = HTTParty.post("http://#{$SERVER_IP}/",
                 :body => { :name => @user.name,
                            :salt_masterkey => stringEncoding(salt_masterkey),
                            :pubkey_user => stringEncoding(keys.public_key.to_pem),
                            :privkey_user_enc => stringEncoding(privkey_user_enc)
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
-
+      redirect_to messages_url, :notice => "Willkommen #{@user.name}"
     else
       redirect_to new_user_path
     end
