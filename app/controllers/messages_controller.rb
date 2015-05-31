@@ -27,6 +27,38 @@ class MessagesController < ApplicationController
   def create
     @message = Message.new(message_params)
 
+    response = HTTParty.get("http://#{$SERVER_IP}/#{@message.recipient}/pubkey")
+    pubkey_recipient = stringDecoding(response["pubkey_user"])
+
+    cipher = OpenSSL::Cipher.new('AES-128-CBC')
+    cipher.encrypt
+    key_recipient = cipher.random_key
+    iv = cipher.random_iv
+
+    encrypted_message = cipher.update(@message.message) + cipher.final
+
+    pub_key = OpenSSL::PKey::RSA.new(pubkey_recipient)
+
+    key_recipient_enc = pub_key.public_encrypt key_recipient
+
+    timestamp = Time.now
+
+    digest = OpenSSL::Digest::SHA256.new
+
+    response = HTTParty.post("http://#{$SERVER_IP}/message",
+                :body => {  :sender => @message.sender,
+                            :cipher => stringEncoding(encrypted_message),
+                            :iv => stringEncoding(iv),
+                            :key_recipient_enc => stringEncoding(key_recipient_enc),
+                            #:sig_recipient => 
+                            :timestamp => timestamp,
+                            :recipient => @message.recipient,
+                           # :sig_service => 
+                          }.to_json,
+                :headers => { 'Content-Type' => 'application/json'})
+
+    #sig_recipient = $privkey_user
+
     respond_to do |format|
       if @message.save
         format.html { redirect_to @message, notice: 'Message was successfully created.' }
