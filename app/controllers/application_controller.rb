@@ -35,4 +35,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def getMessages
+    response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{session[:user_id]}/messages")
+  end
 end
