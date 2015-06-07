@@ -36,10 +36,16 @@ class ApplicationController < ActionController::Base
   end
 
   def getMessages
-    timestamp = Time.now
-    response = HTTParty.get("http://#{$SERVER_IP}/#{session[:user_id]}/messages",
-                :headers => { 'Content-Type' => 'application/json',
-                              'timestamp'    => timestamp
-                            })
+    timestamp = Time.now.to_i
+    document = current_user.name.to_s + timestamp.to_s
+    digest = OpenSSL::Digest::SHA256.new
+    sig_user = $privkey_user.sign digest, document
+    response = HTTParty.get("http://#{$SERVER_IP}/#{current_user.name}/message",
+                  :body => {  
+                              :timestamp => timestamp,
+                              :sig_user => stringEncoding(sig_user),
+                            }.to_json,
+                  :headers => { 'Content-Type' => 'application/json'})
+    return response
   end
 end

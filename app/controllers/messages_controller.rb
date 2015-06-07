@@ -4,8 +4,22 @@ class MessagesController < ApplicationController
   # GET /messages
   # GET /messages.json
   def index
-    getMessages
-    @messages = Message.all
+    @messages = getMessages
+    puts "testen wir mal den scheiß"
+    puts @messages
+    puts "testen den shit ende"
+    @messages.each do |m|
+      key_recipient = $privkey_user.private_decrypt stringDecoding(m["key_recipient_enc"])
+      iv = stringDecoding(m["iv"])
+      cipher = OpenSSL::Cipher.new('AES-128-CBC')
+      decipher = cipher.decrypt
+      decipher.key = key_recipient
+      decipher.iv = iv
+      plain_message = decipher.update(stringDecoding(m["cipher"])) + decipher.final
+      puts "#####################################################"
+      puts plain_message
+      puts "#####################################################"
+    end
   end
 
   # GET /messages/1
@@ -45,26 +59,26 @@ class MessagesController < ApplicationController
     timestamp = Time.now.to_i
 
     digest = OpenSSL::Digest::SHA256.new
-
-    # digest = OpenSSL::Digest::SHA256.new
     
-    # document = current_user.name.to_s + encrypted_message.to_s + iv.to_s + key_recipient_enc.to_s
+    document = current_user.name.to_s + encrypted_message.to_s + iv.to_s + key_recipient_enc.to_s
 
-    # sig_recipient = $privkey_user.sign digest, document
+    sig_recipient = $privkey_user.sign digest, document
+
+    outterSignature = document.to_s + timestamp.to_s + @message.recipient.to_s
+
+    sig_service = $privkey_user.sign digest, outterSignature
 
     response = HTTParty.post("http://#{$SERVER_IP}/message",
                 :body => {  :sender => @message.sender,
                             :cipher => stringEncoding(encrypted_message),
                             :iv => stringEncoding(iv),
                             :key_recipient_enc => stringEncoding(key_recipient_enc),
-                            #:sig_recipient => 
+                            :sig_recipient => stringEncoding(sig_recipient),
                             :timestamp => timestamp,
                             :recipient => @message.recipient,
-                           # :sig_service => 
+                            :sig_service => stringEncoding(sig_service)
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
-
-    #sig_recipient = $privkey_user
 
     respond_to do |format|
       if @message.save

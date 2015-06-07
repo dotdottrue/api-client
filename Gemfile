@@ -28,6 +28,8 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'quiet_assets'
 #gem 'better_errors'
 
+gem "twitter-bootstrap-rails"
+
 # Use Unicorn as the app server
 # gem 'unicorn'
 
@@ -40,9 +42,6 @@ group :development, :test do
   gem 'web-console', '~> 2.0'
   
   gem 'therubyracer'
-  gem 'less-rails'
-  gem 'twitter-bootstrap-rails'
-  gem 'bootstrap-sass', '~> 3.3.4'
 
   gem 'httparty'
   
