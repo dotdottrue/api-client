@@ -36,6 +36,10 @@ class ApplicationController < ActionController::Base
   end
 
   def getMessages
-    response = HTTParty.get("http://#{WebClient::Application::SERVER_IP}/#{session[:user_id]}/messages")
+    timestamp = Time.now
+    response = HTTParty.get("http://#{$SERVER_IP}/#{session[:user_id]}/messages",
+                :headers => { 'Content-Type' => 'application/json',
+                              'timestamp'    => timestamp
+                            })
   end
 end

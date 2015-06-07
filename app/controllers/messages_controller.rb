@@ -42,9 +42,15 @@ class MessagesController < ApplicationController
 
     key_recipient_enc = pub_key.public_encrypt key_recipient
 
-    timestamp = Time.now
+    timestamp = Time.now.to_i
 
     digest = OpenSSL::Digest::SHA256.new
+
+    # digest = OpenSSL::Digest::SHA256.new
+    
+    # document = current_user.name.to_s + encrypted_message.to_s + iv.to_s + key_recipient_enc.to_s
+
+    # sig_recipient = $privkey_user.sign digest, document
 
     response = HTTParty.post("http://#{$SERVER_IP}/message",
                 :body => {  :sender => @message.sender,
