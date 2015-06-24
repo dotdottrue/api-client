@@ -37,12 +37,12 @@ class UsersController < ApplicationController
       masterkey = OpenSSL::PKCS5.pbkdf2_hmac(user_params[:password], salt_masterkey, iteration, 256, digest)
 
       keys = OpenSSL::PKey::RSA.new 2048
-      $PRIVKEY_USER = keys.to_pem
+      $privkey_user = keys.to_pem
 
       cipher = OpenSSL::Cipher.new('AES-128-ECB')
       cipher.encrypt
       cipher.key = masterkey
-      privkey_user_enc = cipher.update($PRIVKEY_USER) + cipher.final
+      privkey_user_enc = cipher.update($privkey_user) + cipher.final
 
       response = HTTParty.post("http://#{$SERVER_IP}/",
                 :body => { :name => @user.name,

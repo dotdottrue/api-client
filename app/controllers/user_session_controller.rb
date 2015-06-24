@@ -29,7 +29,7 @@ class UserSessionController < ApplicationController
 
   		redirect_to messages_url, :notice => "Willkommen, #{@user.name}"  
   	else
-  		redirect_to root_url, :notice => "User name or password doesn't match!!"
+  		redirect_to root_url, :notice => "Benutzername oder Passwort stimmen nicht überein!"
   	end
   end
 

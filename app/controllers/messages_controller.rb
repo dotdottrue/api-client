@@ -1,24 +1,39 @@
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
 
+  
+  def message_overview
+    @sended_messages = Message.find_by_sender(current_user.name)
+    puts "Test"
+    puts @sended_messages.to_json
+  end
   # GET /messages
   # GET /messages.json
   def index
     @messages = getMessages
-    puts "testen wir mal den scheiß"
-    puts @messages
-    puts "testen den shit ende"
-    @messages.each do |m|
-      key_recipient = $privkey_user.private_decrypt stringDecoding(m["key_recipient_enc"])
-      iv = stringDecoding(m["iv"])
-      cipher = OpenSSL::Cipher.new('AES-128-CBC')
-      decipher = cipher.decrypt
-      decipher.key = key_recipient
-      decipher.iv = iv
-      plain_message = decipher.update(stringDecoding(m["cipher"])) + decipher.final
-      puts "#####################################################"
-      puts plain_message
-      puts "#####################################################"
+
+    if !@message.nil?
+      puts "testen wir mal den scheiß"
+      puts @messages
+      puts "testen den shit ende"
+      @messages.each do |m|
+        key_recipient = $privkey_user.private_decrypt stringDecoding(m["key_recipient_enc"])
+        iv = stringDecoding(m["iv"])
+        cipher = OpenSSL::Cipher.new('AES-128-CBC')
+        decipher = cipher.decrypt
+        decipher.key = key_recipient
+        decipher.iv = iv
+        plain_message = decipher.update(stringDecoding(m["cipher"])) + decipher.final
+        m["cipher"] = plain_message
+        puts "#####################################################"
+        puts plain_message
+        puts "#####################################################"
+      end
+    end
+    if response.status === 200
+      flash[:notice] = "200 ist ausgabe"
+    elsif response.status === 503
+      flash[:notice] = "503 Wrong Signature"
     end
   end
 

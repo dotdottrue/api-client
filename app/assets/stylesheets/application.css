@@ -13,3 +13,15 @@
  *= require_tree .
  *= require_self
  */
+
+.left_box {
+    width: 45%;
+    float: left;
+    background-color: #FFF;
+}
+
+.right_box {
+    width: 45%;
+    float: right;
+    background-color: #FFF;
+}
