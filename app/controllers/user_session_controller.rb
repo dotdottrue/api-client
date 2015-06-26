@@ -3,7 +3,7 @@ class UserSessionController < ApplicationController
   end
 
   def create
-  	@user = User.find_by(name: params[:user_session][:name].downcase)
+    @user = User.find_by(name: params[:user_session][:name].downcase)
     if @user && @user.authenticate(params[:user_session][:password])
       log_in(@user)
 
@@ -13,16 +13,16 @@ class UserSessionController < ApplicationController
 
       digest = OpenSSL::Digest::SHA256.new
 
-      masterkey = OpenSSL::PKCS5.pbkdf2_hmac(params[:user_session][:password], stringDecoding(response["salt_masterkey"]), iteration, 256, digest)
+      masterkey = OpenSSL::PKCS5.pbkdf2_hmac(params[:user_session][:password], Base64.strict_decode64(response["salt_masterkey"]), iteration, 256, digest)
 
-      $pubkey_user = stringDecoding(response["pubkey_user"])
+      $pubkey_user = Base64.strict_decode64(response["pubkey_user"])
 
       decipher = OpenSSL::Cipher::AES.new(128, :ECB)
       decipher.decrypt
       decipher.padding = 0
       decipher.key = masterkey
 
-      privkey_user_enc_plane = stringDecoding(response["privkey_user_enc"])
+      privkey_user_enc_plane = Base64.strict_decode64(response["privkey_user_enc"])
       privkey_user_enc = decipher.update(privkey_user_enc_plane) + decipher.final
     
       $privkey_user = OpenSSL::PKey::RSA.new(privkey_user_enc, masterkey)

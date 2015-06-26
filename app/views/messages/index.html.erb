@@ -12,6 +12,7 @@
       </tr>
     </thead>
     <tbody>
+      
       <% @messages.each do |message| %>
         <tr>
           <td><%= message["sender"] %></td>
@@ -36,10 +37,12 @@
       </tr>
     </thead>
     <tbody>
-      <% @messages.each do |message| %>
+      <% @user_messages.each do |messages| %>
         <tr>
-          <td><%= message["sender"] %></td>
-          <td><%= message["cipher"] %></td>
+          <td><%= messages.sender %></td>
+          <td><%= messages.message %></td>
+          <td><%= link_to 'Show', messages %></td>
+          <td><%= link_to 'Destroy', messages, method: :delete, data: { confirm: 'Are you sure?' } %></td>
         </tr>
       <% end %>
     </tbody>

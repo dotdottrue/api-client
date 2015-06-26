@@ -26,7 +26,6 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      log_in(@user)
       
       salt_masterkey = OpenSSL::Random.random_bytes 64
 
@@ -46,13 +45,21 @@ class UsersController < ApplicationController
 
       response = HTTParty.post("http://#{$SERVER_IP}/",
                 :body => { :name => @user.name,
-                           :salt_masterkey => stringEncoding(salt_masterkey),
-                           :pubkey_user => stringEncoding(keys.public_key.to_pem),
-                           :privkey_user_enc => stringEncoding(privkey_user_enc)
+                           :salt_masterkey => Base64.strict_encode64(salt_masterkey),
+                           :pubkey_user => Base64.strict_encode64(keys.public_key.to_pem),
+                           :privkey_user_enc => Base64.strict_encode64(privkey_user_enc)
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
-      redirect_to messages_url, :notice => "Willkommen #{@user.name}"
+
+      if response.code === 200
+        flash[:notice] = "Statuscode: 200, Nachricht: Benutzer erfolgreich angelegt."
+      elsif response.code === 500
+        flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
+        User.destroy(@user.name)
+      end
+      redirect_to ''
     else
+      flash[:notice] = "Benutzer konnte nicht angelegt werden."
       redirect_to new_user_path
     end
 

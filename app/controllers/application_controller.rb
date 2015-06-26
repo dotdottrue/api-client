@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
   include UserSessionHelper
+  include MessagesHelper
   include ApplicationHelper
 
   helper_method :current_user
@@ -17,17 +18,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def stringEncoding(input)
-    new_string = Base64.strict_encode64(input)
-    return new_string
-  end
+  # def stringEncoding(input)
+  #   new_string = Base64.strict_encode64(input)
+  #   return new_string
+  # end
 
-  def stringDecoding(input)
-    new_string = Base64.strict_decode64(input)
-    return new_string
-  end
+  # def stringDecoding(input)
+  #   new_string = Base64.strict_decode64(input)
+  #   return new_string
+  # end
 
-  def getRecipients
+  def get_recipients
     response = HTTParty.get("http://#{$SERVER_IP}/")
     @recipients = []
     response.each do |recipient|
@@ -35,7 +36,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def getMessages
+  def get_messages
     timestamp = Time.now.to_i
     document = current_user.name.to_s + timestamp.to_s
     digest = OpenSSL::Digest::SHA256.new
@@ -43,9 +44,10 @@ class ApplicationController < ActionController::Base
     response = HTTParty.get("http://#{$SERVER_IP}/#{current_user.name}/message",
                   :body => {  
                               :timestamp => timestamp,
-                              :sig_user => stringEncoding(sig_user),
+                              :sig_user => Base64.strict_encode64(sig_user),
                             }.to_json,
                   :headers => { 'Content-Type' => 'application/json'})
-    return response
+    
+    response
   end
 end
