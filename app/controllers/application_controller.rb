@@ -18,16 +18,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # def stringEncoding(input)
-  #   new_string = Base64.strict_encode64(input)
-  #   return new_string
-  # end
-
-  # def stringDecoding(input)
-  #   new_string = Base64.strict_decode64(input)
-  #   return new_string
-  # end
-
   def get_recipients
     response = HTTParty.get("http://#{$SERVER_IP}/")
     @recipients = []

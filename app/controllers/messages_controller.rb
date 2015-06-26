@@ -3,11 +3,11 @@ require 'crypto_messenger/message'
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
 
-  def message_overview
-    @sended_messages = Message.find_by_sender(current_user.name)
-    puts "Test"
-    puts @sended_messages.to_json
-  end
+  # def message_overview
+  #   @sended_messages = Message.find_by_sender(current_user.name)
+  #   puts "Test"
+  #   puts @sended_messages.to_json
+  # end
 
   # GET /messages
   # GET /messages.json
@@ -19,10 +19,17 @@ class MessagesController < ApplicationController
     if @messages.code === 200
       @messages.each do |message|
         message["cipher"] = CryptoMessenger::Message.decrypt(message)
+
+        new_message = Inbox.new(recipient: message["sender"], message: message["cipher"])
+        new_message.save
+
         puts "#####################################################"
         puts message["cipher"]
         puts "#####################################################"
       end
+
+      @inbox = Inbox.where(recipient: current_user.name)
+
       flash[:notice] = "Statuscode:200 Nachricht: OK"
     elsif @messages.code === 503
       flash[:notice] = "Statuscode: 503, Nachricht: Falsche Signatur"
@@ -53,21 +60,22 @@ class MessagesController < ApplicationController
 
     encrypt = CryptoMessenger::Message.encrypt(@message, current_user)
 
-    respond_to do |format|
-      if encrypt.code === 200
+    # if encrypt.code === 200
+    #   flash[:notice] = "Statuscode: 200, Nachricht: Nachricht wurde erfolreich an den Server gesendet."
+    # elsif encrypt.code === 503
+    #   flash[:notice] = "Statuscode: 503, Nachricht: Der Dienst ist grade nicht erreichbar."
+    # elsif encrypt.code === 500
+    #   flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
+    # end
+      respond_to do |format|
         if @message.save
           format.html { redirect_to @message, notice: 'Nachricht wurde erfolgreich angelegt.' }
-          format.json { render :show, status: :created, location: @message }
         else
           format.html { render :new }
-          format.json { render json: @message.errors, status: :unprocessable_entity }
+          flash[:notice] = "Nachricht wurde nicht erfolgreich erstellt."
         end
-      elsif encrypt.code === 503
-        flash[:notice] = "Statuscode: 503, Nachricht: Der Dienst ist grade nicht erreichbar."
-      elsif encrypt.code === 500
-        flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
       end
-    end
+
   end
 
   # PATCH/PUT /messages/1
