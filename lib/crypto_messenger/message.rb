@@ -1,37 +1,13 @@
 module CryptoMessenger
   class Message
-    
-    def self.encrypt(plain_message, current_user)
-      enrycpted_message = CryptoMessenger::Message.encrypt_message(plain_message)
 
-      key_recipient_enc = CryptoMessenger::Message.create_pubkey_recipient(plain_message.recipient)
-
-      timestamp = Time.now.to_i     
-
-      sig_recipient = CryptoMessenger::Message.create_sig_recipient(current_user.name.to_s, @encrypted_message.to_s, @key_recipient_enc.to_s, @iv.to_s)
-
-      sig_service = CryptoMessenger::Message.create_sig_service(timestamp.to_s, plain_message.recipient.to_s, @document.to_s)
-
-      response = CryptoMessenger::Message.send_message(plain_message.sender, @encrypted_message, key_recipient_enc, sig_recipient, timestamp, plain_message.recipient, sig_service)
-    end
-
-    def self.encrypt_message(plain_message)
-      cipher = OpenSSL::Cipher.new('AES-128-CBC')
-      cipher.encrypt
-      @key_recipient = cipher.random_key
-      @iv = cipher.random_iv
-
-      @encrypted_message = cipher.update(plain_message.message) + cipher.final
-
-      @encrypted_message
-    end
-
-    def self.create_pubkey_recipient(recipient)
+    def self.create_pubkey_recipient(recipient, key_recipient)
       pubkey_response = HTTParty.get("http://#{$SERVER_IP}/#{recipient}/pubkey")
+
       pubkey_recipient = Base64.strict_decode64(pubkey_response["pubkey_user"])
       pub_key = OpenSSL::PKey::RSA.new(pubkey_recipient)
 
-      key_recipient_enc = pub_key.public_encrypt @key_recipient
+      key_recipient_enc = pub_key.public_encrypt key_recipient
 
       key_recipient_enc
     end
@@ -46,19 +22,19 @@ module CryptoMessenger
       sig_recipient
     end
 
-    def self.create_sig_service(timestamp, message_recipient, document)
-      outter_signature =  document + timestamp + message_recipient
+    def self.create_sig_service(current_user_name, encrypted_message, key_recipient_enc, iv, timestamp, message_recipient)
+      outter_signature =  current_user_name + encrypted_message + key_recipient_enc + iv + timestamp + message_recipient
 
       sig_service = $privkey_user.sign @digest, outter_signature
 
       sig_service
     end
 
-    def self.send_message(sender, encrypted_message, key_recipient_enc,sig_recipient, timestamp, recipient, sig_service)
+    def self.send_message(sender, encrypted_message, iv, key_recipient_enc, sig_recipient, timestamp, recipient, sig_service)
       response = HTTParty.post("http://#{$SERVER_IP}/message",
                 :body => {  :sender => sender,
                             :cipher => Base64.strict_encode64(encrypted_message),
-                            :iv => Base64.strict_encode64(@iv),
+                            :iv => Base64.strict_encode64(iv),
                             :key_recipient_enc => Base64.strict_encode64(key_recipient_enc),
                             :sig_recipient => Base64.strict_encode64(sig_recipient),
                             :timestamp => timestamp,
@@ -68,6 +44,15 @@ module CryptoMessenger
                 :headers => { 'Content-Type' => 'application/json'})
 
       response
+    end
+
+    def self.sig_recipient_check(message)
+      digest = OpenSSL::Digest::SHA256.new
+
+      document = message["sender"] + Base64.strict_decode64(message["cipher"]).to_s + Base64.strict_decode64(message["iv"]).to_s + Base64.strict_decode64(message["key_recipient_enc"]).to_s
+      check_sig = $pubkey_user.verify digest, Base64.strict_decode64(message["sig_recipient"]), document
+
+      check_sig
     end
 
     def self.decrypt(message)

@@ -51,12 +51,12 @@ class UsersController < ApplicationController
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
 
-      if response.code === 200
-        flash[:notice] = "Statuscode: 200, Nachricht: Benutzer erfolgreich angelegt."
-      elsif response.code === 500
-        flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
-        User.destroy(@user.name)
-      end
+      # if response.code === 200
+      #   flash[:notice] = "Statuscode: 200, Nachricht: Benutzer erfolgreich angelegt."
+      # elsif response.code === 500
+      #   flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
+      #   User.destroy(@user.name)
+      # end
       redirect_to ''
     else
       flash[:notice] = "Benutzer konnte nicht angelegt werden."

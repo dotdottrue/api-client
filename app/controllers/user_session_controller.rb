@@ -1,3 +1,4 @@
+require 'openssl'
 class UserSessionController < ApplicationController
   def new
   end
@@ -15,7 +16,7 @@ class UserSessionController < ApplicationController
 
       masterkey = OpenSSL::PKCS5.pbkdf2_hmac(params[:user_session][:password], Base64.strict_decode64(response["salt_masterkey"]), iteration, 256, digest)
 
-      $pubkey_user = Base64.strict_decode64(response["pubkey_user"])
+      $pubkey_user = OpenSSL::PKey::RSA.new(Base64.strict_decode64(response["pubkey_user"]))
 
       decipher = OpenSSL::Cipher::AES.new(128, :ECB)
       decipher.decrypt

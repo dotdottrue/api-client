@@ -13,22 +13,25 @@ class MessagesController < ApplicationController
   # GET /messages.json
   def index
     @user_messages = Message.where(sender: current_user.name)
-
     @messages = get_messages
 
     if @messages.code === 200
       @messages.each do |message|
-        message["cipher"] = CryptoMessenger::Message.decrypt(message)
+        if CryptoMessenger::Message.sig_recipient_check(message)
+          message["cipher"] = CryptoMessenger::Message.decrypt(message)
 
-        new_message = Inbox.new(recipient: message["sender"], message: message["cipher"])
-        new_message.save
+          new_message = Inbox.new(recipient: message["sender"], message: message["cipher"])
+          new_message.save
 
-        puts "#####################################################"
-        puts message["cipher"]
-        puts "#####################################################"
+          puts "#####################################################"
+          puts message["cipher"]
+          puts "#####################################################"
+        else
+          flash[:notice] = "Die Signaturen stimmen nicht überein!"
+        end
       end
 
-      @inbox = Inbox.where(recipient: current_user.name)
+      @inbox = Inbox.all.where(recipient: current_user.name)
 
       flash[:notice] = "Statuscode:200 Nachricht: OK"
     elsif @messages.code === 503
@@ -58,8 +61,42 @@ class MessagesController < ApplicationController
   def create
     @message = Message.new(message_params)
 
-    encrypt = CryptoMessenger::Message.encrypt(@message, current_user)
+    cipher = OpenSSL::Cipher.new('AES-128-CBC')
+    cipher.encrypt
+    @key_recipient = cipher.random_key
+    @iv = cipher.random_iv
 
+    timestamp = Time.now.to_i  
+
+    encrypted_message = cipher.update(@message.message) + cipher.final
+
+    key_recipient_enc = CryptoMessenger::Message.create_pubkey_recipient(@message.recipient, @key_recipient)
+
+    sig_recipient = CryptoMessenger::Message.create_sig_recipient(current_user.name.to_s, encrypted_message.to_s, key_recipient_enc.to_s, @iv.to_s)
+    
+    sig_service = CryptoMessenger::Message.create_sig_service( current_user.name.to_s, encrypted_message.to_s, key_recipient_enc.to_s, @iv.to_s, timestamp.to_s, @message.recipient.to_s)
+
+    #  puts "#####################################################"
+    # puts "######################################################"
+    # puts "#####################################################"
+    # puts "sendername:"
+    # puts current_user.name.to_s
+    # puts "encrypted message"
+    # puts encrypted_message.to_s
+    # puts "der IV lautet"
+    # puts key_recipient_enc.to_s
+    # puts "der key recipient ist"
+    # puts @iv.to_s
+    # puts "der timestamp lautet"
+    # puts timestamp.to_s
+    # puts "der recipient lautet"
+    # puts @message.recipient.to_s
+    # puts "ende"
+    #  puts "#####################################################"
+    # puts "######################################################"
+    # puts "#####################################################"
+
+    response = CryptoMessenger::Message.send_message(current_user.name, encrypted_message, @iv, key_recipient_enc, sig_recipient, timestamp, @message.recipient, sig_service)
     # if encrypt.code === 200
     #   flash[:notice] = "Statuscode: 200, Nachricht: Nachricht wurde erfolreich an den Server gesendet."
     # elsif encrypt.code === 503
