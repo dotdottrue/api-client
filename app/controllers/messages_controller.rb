@@ -3,14 +3,6 @@ require 'crypto_messenger/message'
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
 
-  # def message_overview
-  #   @sended_messages = Message.find_by_sender(current_user.name)
-  #   puts "Test"
-  #   puts @sended_messages.to_json
-  # end
-
-  # GET /messages
-  # GET /messages.json
   def index
     @user_messages = Message.where(sender: current_user.name)
     @messages = get_messages
@@ -27,9 +19,9 @@ class MessagesController < ApplicationController
           message["cipher"] = CryptoMessenger::Message.decrypt(message)
 
           new_message = Inbox.new(sender: message["sender"], message: message["cipher"], recipient: message["recipient"])
-          if new_message.save
-            response = HTTParty.get("http://#{$SERVER_IP}/delete_message/#{message["id"]}")
-          end
+          # if new_message.save
+          #   response = HTTParty.get("http://#{$SERVER_IP}/delete_message/#{message["id"]}")
+          # end
 
           puts "#####################################################"
           puts message["cipher"]

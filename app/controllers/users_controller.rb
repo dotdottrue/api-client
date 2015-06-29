@@ -42,8 +42,8 @@ class UsersController < ApplicationController
       cipher.key = masterkey
       privkey_user_enc = cipher.update($privkey_user) + cipher.final
 
-      response = HTTParty.post("http://#{$SERVER_IP}/",
-                :body => { :name => @user.name,
+      response = HTTParty.post("http://#{$SERVER_IP}/user",
+                :body => { :username => @user.name,
                            :salt_masterkey => Base64.strict_encode64(salt_masterkey),
                            :pubkey_user => Base64.strict_encode64(keys.public_key.to_pem),
                            :privkey_user_enc => Base64.strict_encode64(privkey_user_enc)
