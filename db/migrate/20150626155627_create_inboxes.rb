@@ -1,7 +1,7 @@
 class CreateInboxes < ActiveRecord::Migration
   def change
     create_table :inboxes do |t|
-      t.string :recipient
+      t.string :sender
       t.text :message
 
       t.timestamps null: false

@@ -13,7 +13,7 @@
       </thead>
          <% @inbox.each do |messages| %>
             <tr>
-              <td><%= messages.recipient %></td>
+              <td><%= messages.sender %></td>
               <td><%= messages.message %></td>
             </tr>
           <% end %>

@@ -22,7 +22,9 @@ class ApplicationController < ActionController::Base
     response = HTTParty.get("http://#{$SERVER_IP}/")
     @recipients = []
     response.each do |recipient|
-      @recipients << recipient["slug"]
+      if recipient["slug"] != current_user.name
+        @recipients << recipient["slug"]
+      end
     end
   end
 
