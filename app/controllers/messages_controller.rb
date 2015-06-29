@@ -3,14 +3,6 @@ require 'crypto_messenger/message'
 class MessagesController < ApplicationController
   before_action :set_message, only: [:show, :edit, :update, :destroy]
 
-  # def message_overview
-  #   @sended_messages = Message.find_by_sender(current_user.name)
-  #   puts "Test"
-  #   puts @sended_messages.to_json
-  # end
-
-  # GET /messages
-  # GET /messages.json
   def index
     @user_messages = Message.where(sender: current_user.name)
     @messages = get_messages
@@ -51,23 +43,17 @@ class MessagesController < ApplicationController
     end
   end
 
-  # GET /messages/1
-  # GET /messages/1.json
   def show
   end
 
-  # GET /messages/new
   def new
     get_recipients
     @message = Message.new
   end
 
-  # GET /messages/1/edit
   def edit
   end
 
-  # POST /messages
-  # POST /messages.json
   def create
     @message = Message.new(message_params)
 
@@ -107,8 +93,6 @@ class MessagesController < ApplicationController
 
   end
 
-  # PATCH/PUT /messages/1
-  # PATCH/PUT /messages/1.json
   def update
     respond_to do |format|
       if @message.update(message_params)
@@ -121,8 +105,6 @@ class MessagesController < ApplicationController
     end
   end
 
-  # DELETE /messages/1
-  # DELETE /messages/1.json
   def destroy
     @message.destroy
     respond_to do |format|
