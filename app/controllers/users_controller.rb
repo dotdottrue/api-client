@@ -1,28 +1,20 @@
 class UsersController < ApplicationController
   before_action :set_user, only: [:show, :edit, :update, :destroy]
 
-  # GET /users
-  # GET /users.json
   def index
     @users = User.all
   end
 
-  # GET /users/1
-  # GET /users/1.json
   def show
   end
 
-  # GET /users/new
   def new
     @user = User.new
   end
 
-  # GET /users/1/edit
   def edit
   end
 
-  # POST /users
-  # POST /users.json
   def create
     @user = User.new(user_params)
 
@@ -49,15 +41,17 @@ class UsersController < ApplicationController
                            :privkey_user_enc => Base64.strict_encode64(privkey_user_enc)
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
-      # if response.code === 200
-      #   flash[:notice] = "Statuscode: 200, Nachricht: Benutzer erfolgreich angelegt."
-      # elsif response.code === 500
-      #   flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
-      #   User.destroy(@user.name)
-      # end
+
     if response.code === 200 
       @user.save
+      flash[:notice] = "Statuscode: 200, Nachricht: Benutzer wurde erfolgreich Registriert"
       redirect_to ''
+    elsif response.code === 501 
+      flash[:notice] = "Statuscode: 501, Nachricht: Benutzer existiert bereits."
+      redirect_to new_user_path
+    elsif response.code === 500
+      flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
+      redirect_to new_user_path
     else
       flash[:notice] = "Benutzer konnte nicht angelegt werden."
       redirect_to new_user_path
@@ -76,8 +70,6 @@ class UsersController < ApplicationController
     # end
   end
 
-  # PATCH/PUT /users/1
-  # PATCH/PUT /users/1.json
   def update
     respond_to do |format|
       if @user.update(user_params)
@@ -90,8 +82,6 @@ class UsersController < ApplicationController
     end
   end
 
-  # DELETE /users/1
-  # DELETE /users/1.json
   def destroy
     @user.destroy
     respond_to do |format|
