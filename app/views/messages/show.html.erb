@@ -1,13 +1,12 @@
-<p id="notice"><%= notice %></p>
-
-<p>
-  <strong>Sender:</strong>
-  <%= @message.sender %>
-</p>
-
-<p>
-  <strong>Message:</strong>
-  <%= @message.message %>
-</p>
-
-<%= link_to 'Back', messages_path %>
+<div class="row">
+  <div class="col-md-3"></div>
+  <div class="col-md-6">
+    <div class="panel panel-primary">
+      <div class="panel-heading">Sender: <%= @message.sender %></div>
+      <div class="panel-body">
+      	<p><%= @message.message %></p>
+	  </div>
+	</div>
+	<%= link_to 'Zurück', messages_path, class: "btn btn-default btn-sm" %>
+  </div>
+</div>
