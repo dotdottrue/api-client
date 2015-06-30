@@ -31,7 +31,10 @@ class UserSessionController < ApplicationController
 
         flash[:notice] = "Statuscode: 200, Nachricht: Benutzerdaten wurden abgerufen."
         redirect_to messages_url, :notice => "Willkommen, #{@user.name}"  
-  	else
+  	  else
+        redirect_to root_url, :notice => "Nachricht: Benutzerdaten konnte nicht abgerufen werden!"
+      end
+    else
   		redirect_to root_url, :notice => "Benutzername oder Passwort stimmen nicht überein!"
   	end
   end
