@@ -39,11 +39,13 @@ class MessagesController < ApplicationController
 
       @inbox = Inbox.all.where(recipient: current_user.name)
 
-      flash[:notice] = "Statuscode:201 Nachricht: OK"
-    elsif @messages.code === 503
-      flash[:notice] = "Statuscode: 503, Nachricht: Falsche Signatur"
-    elsif @messages.code === 501
-      flash[:notice] = "Statuscode: 501, Nachricht: Anfragezeit zu lang."
+      flash[:notice] = "Statuscode:200 Nachricht: OK - Gewünschte Daten wurden geliefert"
+    elsif @messages.code === 401
+      flash[:notice] = "Statuscode: 401, Nachricht: Unauthorized - Signatur nicht gültig"
+    elsif @messages.code === 404
+      flash[:notice] = "Statuscode: 404, Nachricht: Not Found - Angefragte Ressource nicht vorhanden"
+    elsif @messages.code === 408
+      flash[:notice] = "Statuscode: 408, Nachricht: Request Time-out - Anfrage ist älter als 5 Minuten"
     end
   end
 
@@ -77,16 +79,10 @@ class MessagesController < ApplicationController
     sig_service = CryptoMessenger::Message.create_sig_service( current_user.name.to_s, encrypted_message.to_s, @iv.to_s, key_recipient_enc.to_s, sig_recipient.to_s, timestamp.to_s, @message.recipient.to_s)
 
     response = CryptoMessenger::Message.send_message(current_user.name, encrypted_message, @iv, key_recipient_enc, sig_recipient, timestamp, @message.recipient, sig_service)
-  
-
-    # if encrypt.code === 200
-    #   flash[:notice] = "Statuscode: 200, Nachricht: Nachricht wurde erfolreich an den Server gesendet."
-    # elsif encrypt.code === 503
-    #   flash[:notice] = "Statuscode: 503, Nachricht: Der Dienst ist grade nicht erreichbar."
-    # elsif encrypt.code === 500
-    #   flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
-    # end
-      respond_to do |format|
+    
+    respond_to do |format|
+      if response.code === 201
+        flash[:notice] = "Statuscode: 201, Nachricht: Created - wurde angelegt."
         if @message.save
           format.html { redirect_to @message, notice: 'Nachricht wurde erfolgreich angelegt.' }
         else
@@ -94,7 +90,22 @@ class MessagesController < ApplicationController
           flash[:notice] = "Nachricht wurde nicht erfolgreich erstellt."
         end
       end
-
+      if response.code === 400
+        flash[:notice] = "Statuscode: 400, Nachricht: Bad Request - Fehler in der Syntax (JSON)"
+      end
+      if response.code === 404
+        flash[:notice] = "Statuscode: 404, Nachricht: Not Found - Angefragte Ressource nicht vorhanden"
+      end
+      if response.code === 401
+        flash[:notice] = "Statuscode: 401, Nachricht: Unauthorized - Signatur nicht gültig"
+      end
+      if response.code === 408
+        flash[:notice] = "Statuscode: 408, Nachricht: Request Time-out - Anfrage ist älter als 5 Minuten"
+      end
+      if response.code === 422
+        flash[:notice] = "Statuscode: 422, Nachricht: Unprocessable Entity - Speichern fehlgeschlagen"
+      end
+    end
   end
 
   def update

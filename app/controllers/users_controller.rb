@@ -62,8 +62,16 @@ class UsersController < ApplicationController
       @user.save
       redirect_to ''
     else
-      flash[:notice] = "Benutzer konnte nicht angelegt werden."
+      if response.code === 422
+      flash[:notice] = "Statuscode: 422, Speichern fehlgeschlagen."
       redirect_to new_user_path
+      elsif response.code === 400
+        flash[:notice] = "Statuscode: 400, Fehler in der Syntax."
+        redirect_to new_user_path
+      elsif response.code === 409
+        flash[:notice] = "Statuscode: 409, Username bereits vergeben."
+        redirect_to new_user_path
+      end
     end
 
     # respond_to do |format|
