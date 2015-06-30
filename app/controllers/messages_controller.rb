@@ -11,7 +11,6 @@ class MessagesController < ApplicationController
       @messages.each do |message|
         puts "#####################################################"
         puts "###################SIGNATURE CHECK###################"
-        puts message.to_json
         puts "#####################################################"
         if CryptoMessenger::Message.sig_recipient_check(message)
           puts "###################SIGNATURE Valid###################"
@@ -31,8 +30,7 @@ class MessagesController < ApplicationController
         end
       end
 
-      @inbox = Inbox.all.where(recipient: current_user.name)
-
+      @inbox = Inbox.where(recipient: current_user.name).order(created_at: :desc)
       flash[:notice] = "Statuscode:200 Nachricht: OK"
     elsif @messages.code === 503
       flash[:notice] = "Statuscode: 503, Nachricht: Falsche Signatur"
@@ -68,24 +66,26 @@ class MessagesController < ApplicationController
 
     sig_recipient = CryptoMessenger::Message.create_sig_recipient(current_user.name.to_s, encrypted_message.to_s, @iv.to_s, key_recipient_enc.to_s)
     
-    sig_service = CryptoMessenger::Message.create_sig_service( current_user.name.to_s, encrypted_message.to_s, @iv.to_s, key_recipient_enc.to_s, timestamp.to_s, @message.recipient.to_s)
+    sig_service = CryptoMessenger::Message.create_sig_service( current_user.name.to_s, encrypted_message.to_s, @iv.to_s, key_recipient_enc.to_s, sig_recipient.to_s, timestamp.to_s, @message.recipient.to_s)
 
     response = CryptoMessenger::Message.send_message(current_user.name, encrypted_message, @iv, key_recipient_enc, sig_recipient, timestamp, @message.recipient, sig_service)
   
 
-    # if encrypt.code === 200
-    #   flash[:notice] = "Statuscode: 200, Nachricht: Nachricht wurde erfolreich an den Server gesendet."
-    # elsif encrypt.code === 503
-    #   flash[:notice] = "Statuscode: 503, Nachricht: Der Dienst ist grade nicht erreichbar."
-    # elsif encrypt.code === 500
-    #   flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
-    # end
+    
+    
       respond_to do |format|
-        if @message.save
-          format.html { redirect_to @message, notice: 'Nachricht wurde erfolgreich angelegt.' }
-        else
-          format.html { render :new }
-          flash[:notice] = "Nachricht wurde nicht erfolgreich erstellt."
+        if response.code === 200
+          flash[:notice] = "Statuscode: 200, Nachricht: Nachricht wurde erfolreich an den Server gesendet."
+          if @message.save
+            format.html { redirect_to @message, notice: 'Nachricht wurde erfolgreich angelegt.' }
+          else
+            format.html { render :new }
+            flash[:notice] = "Nachricht wurde nicht erfolgreich erstellt."
+          end
+        elsif response.code === 503
+          flash[:notice] = "Statuscode: 503, Nachricht: Der Dienst ist grade nicht erreichbar."
+        elsif response.code === 500
+          flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
         end
       end
 

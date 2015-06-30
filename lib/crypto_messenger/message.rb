@@ -20,8 +20,8 @@ module CryptoMessenger
       sig_recipient
     end
 
-    def self.create_sig_service(current_user_name, encrypted_message, iv, key_recipient_enc, timestamp, message_recipient)
-      outter_signature =  current_user_name + encrypted_message + iv + key_recipient_enc + timestamp + message_recipient
+    def self.create_sig_service(current_user_name, encrypted_message, iv, key_recipient_enc, sig_recipient, timestamp, message_recipient)
+      outter_signature =  current_user_name + encrypted_message + iv + key_recipient_enc + sig_recipient + timestamp + message_recipient
 
       sig_service = $privkey_user.sign @digest, outter_signature
 
