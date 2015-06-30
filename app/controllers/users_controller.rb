@@ -43,10 +43,13 @@ class UsersController < ApplicationController
       privkey_user_enc = cipher.update($privkey_user) + cipher.final
 
       response = HTTParty.post("http://#{$SERVER_IP}/user",
-                :body => { :username => @user.name,
-                           :salt_masterkey => Base64.strict_encode64(salt_masterkey),
-                           :pubkey_user => Base64.strict_encode64(keys.public_key.to_pem),
-                           :privkey_user_enc => Base64.strict_encode64(privkey_user_enc)
+                :body => { 
+                          :user => { 
+                             :username => @user.name,
+                             :salt_masterkey => Base64.strict_encode64(salt_masterkey),
+                             :pubkey_user => Base64.strict_encode64(keys.public_key.to_pem),
+                             :privkey_user_enc => Base64.strict_encode64(privkey_user_enc)
+                           }
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
       # if response.code === 200
@@ -55,7 +58,7 @@ class UsersController < ApplicationController
       #   flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
       #   User.destroy(@user.name)
       # end
-    if response.code === 200 
+    if response.code === 201 
       @user.save
       redirect_to ''
     else

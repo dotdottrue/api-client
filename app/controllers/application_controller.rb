@@ -36,7 +36,7 @@ class ApplicationController < ActionController::Base
     response = HTTParty.get("http://#{$SERVER_IP}/#{current_user.name}/message",
                   :body => {  
                               :timestamp => timestamp,
-                              :sig_user => Base64.strict_encode64(sig_user),
+                              :signature => Base64.strict_encode64(sig_user),
                             }.to_json,
                   :headers => { 'Content-Type' => 'application/json'})
     

@@ -30,14 +30,14 @@ module CryptoMessenger
 
     def self.send_message(sender, encrypted_message, iv, key_recipient_enc, sig_recipient, timestamp, recipient, sig_service)
       response = HTTParty.post("http://#{$SERVER_IP}/#{recipient}/message",
-                :body => {  :sender => sender,
-                            :cipher => Base64.strict_encode64(encrypted_message),
-                            :iv => Base64.strict_encode64(iv),
-                            :key_recipient_enc => Base64.strict_encode64(key_recipient_enc),
-                            :sig_recipient => Base64.strict_encode64(sig_recipient),
-                            :timestamp => timestamp,
-                            :recipient => recipient,
-                            :sig_service => Base64.strict_encode64(sig_service)
+                :body => { :outerMessage => { :timestamp => timestamp, 
+                          :sig_service => Base64.strict_encode64(sig_service),
+                          :sender => sender, 
+                          :cipher => Base64.strict_encode64(encrypted_message),
+                          :iv => Base64.strict_encode64(iv),
+                          :key_recipient_enc => Base64.strict_encode64(key_recipient_enc),
+                          :sig_recipient => Base64.strict_encode64(sig_recipient)
+                        }                           
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
 

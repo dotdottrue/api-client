@@ -10,7 +10,7 @@ Bundler.require(*Rails.groups)
 module Webclient
   class Application < Rails::Application
 
-    $SERVER_IP = "localhost:3000"
+    $SERVER_IP = "192.168.0.14:3001"
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.

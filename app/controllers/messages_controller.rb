@@ -5,6 +5,10 @@ class MessagesController < ApplicationController
 
   def index
     @user_messages = Message.where(sender: current_user.name)
+    puts "TESTTESTTEST"
+    puts current_user.name
+    puts @user_messages.to_json
+    puts "ENDEENDEENDE"
     @messages = get_messages
 
     if @messages.code === 200
@@ -18,10 +22,10 @@ class MessagesController < ApplicationController
           puts "#####################################################"
           message["cipher"] = CryptoMessenger::Message.decrypt(message)
 
-          new_message = Inbox.new(sender: message["sender"], message: message["cipher"], recipient: message["recipient"])
-          # if new_message.save
-          #   response = HTTParty.get("http://#{$SERVER_IP}/delete_message/#{message["id"]}")
-          # end
+          new_message = Inbox.new(sender: message["sender"], message: message["cipher"], recipient: current_user.name)
+          if new_message.save
+            #response = HTTParty.get("http://#{$SERVER_IP}/delete_message/#{message["id"]}")
+          end
 
           puts "#####################################################"
           puts message["cipher"]
@@ -35,7 +39,7 @@ class MessagesController < ApplicationController
 
       @inbox = Inbox.all.where(recipient: current_user.name)
 
-      flash[:notice] = "Statuscode:200 Nachricht: OK"
+      flash[:notice] = "Statuscode:201 Nachricht: OK"
     elsif @messages.code === 503
       flash[:notice] = "Statuscode: 503, Nachricht: Falsche Signatur"
     elsif @messages.code === 501
