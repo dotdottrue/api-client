@@ -1,5 +1,14 @@
-<h1>Neue Nachricht schreiben</h1>
+<div class="row">
+  <div class="col-md-3"></div>
+  <div class="col-md-6">
+    <div class="panel panel-primary">
+      <div class="panel-heading">Neue Nachricht schreiben</div>
+      <div class="panel-body">
+		<%= render 'form' %>
+	  </div>
+	</div>
+	<%= link_to 'Zurück', messages_path, class: "btn btn-default btn-sm" %>
+  </div>
+</div>
 
-<%= render 'form' %>
 
-<%= link_to 'Back', messages_path %>
