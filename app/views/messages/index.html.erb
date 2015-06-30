@@ -17,6 +17,9 @@
                 <tr>
                   <td><%= messages.sender %></td>
                   <td><%= messages.message %></td>
+                  <td>
+                    <%= link_to 'Löschen', messages, method: :delete, data: { confirm: 'Sind Sie sicher?' }, class: 'btn btn-xs btn-danger', style:'color:#FFFFFF' %>
+                  </td>
                 </tr>
               <% end %>
           </tbody>
@@ -49,8 +52,10 @@
                 <td><%= messages.sender %></td>
                 <td><%= messages.recipient %></td>
                 <td><%= messages.message %></td>
-                <td><%= link_to 'Show', messages %></td>
-                <td><%= link_to 'Destroy', messages, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+                <td><%= link_to 'Anzeigen', messages, class: 'btn btn-xs btn-success', style:'color:#FFFFFF' %></td>
+                <td>
+                  <%= link_to 'Löschen', messages, method: :delete, data: { confirm: 'Sind Sie sicher?' }, class: 'btn btn-xs btn-danger', style:'color:#FFFFFF' %>
+                </td>
               </tr>
             <% end %>
           </tbody>
