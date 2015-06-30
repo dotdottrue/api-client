@@ -11,17 +11,15 @@ class MessagesController < ApplicationController
       @messages.each do |message|
         puts "#####################################################"
         puts "###################SIGNATURE CHECK###################"
-        puts "#####################################################"
         puts message.to_json
+        puts "#####################################################"
         if CryptoMessenger::Message.sig_recipient_check(message)
           puts "###################SIGNATURE Valid###################"
           puts "#####################################################"
           message["cipher"] = CryptoMessenger::Message.decrypt(message)
 
           new_message = Inbox.new(sender: message["sender"], message: message["cipher"], recipient: message["recipient"])
-          if new_message.save
-            response = HTTParty.get("http://#{$SERVER_IP}/delete_message/#{message["id"]}")
-          end
+          new_message.save
 
           puts "#####################################################"
           puts message["cipher"]
