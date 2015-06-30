@@ -1,57 +1,66 @@
 <!-- <p id="notice"><%= notice %></p> -->
-
-<div class="left_box">
-  <h1>Nachrichteneingang</h1>
-  <% if !@inbox.nil? %>
-    <table class="table">
-      <thead>
-        <tr>
-          <th width="25%">Sender</th>
-          <th width="75%">Message</th>
-          <th colspan="3"></th>
-        </tr>
-      </thead>
-         <% @inbox.each do |messages| %>
+<div class="row">
+<div class="col-md-6">
+  <div class="panel panel-primary">
+    <div class="panel-heading">Nachrichteneingang</div>
+    <div class="panel-body">
+      <% if !@inbox.nil? %>
+        <table class="table">
+          <thead>
             <tr>
-              <td><%= messages.sender %></td>
-              <td><%= messages.message %></td>
+              <th width="25%">Sender</th>
+              <th width="75%">Message</th>
+              <th colspan="3"></th>
             </tr>
-          <% end %>
-      </tbody>
-  </table>
-  <% else %>
-    <p> Keine Nachrichten vorhanden! </p>
-  <% end %> 
+          </thead>
+             <% @inbox.each do |messages| %>
+                <tr>
+                  <td><%= messages.sender %></td>
+                  <td><%= messages.message %></td>
+                </tr>
+              <% end %>
+          </tbody>
+      </table>
+      <% else %>
+        <p> Keine Nachrichten vorhanden! </p>
+      <% end %> 
 
-  <br>
+      <br>
+    </div>
+  </div>
 </div>
 
-<div class="right_box">
-  <h1>Nachrichtenausgang</h1>
+<div class="col-md-6">
+  <div class="panel panel-primary">
+    <div class="panel-heading">Nachrichtenausgang</div>
+    <div class="panel-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th width="15%">Sender</th>
+              <th width="15%">Recipient</th>
+              <th width="70%">Message</th>
+              <th colspan="3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @user_messages.each do |messages| %>
+              <tr>
+                <td><%= messages.sender %></td>
+                <td><%= messages.recipient %></td>
+                <td><%= messages.message %></td>
+                <td><%= link_to 'Show', messages %></td>
+                <td><%= link_to 'Destroy', messages, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th width="15%">Sender</th>
-        <th width="15%">Recipient</th>
-        <th width="70%">Message</th>
-        <th colspan="3"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @user_messages.each do |messages| %>
-        <tr>
-          <td><%= messages.sender %></td>
-          <td><%= messages.recipient %></td>
-          <td><%= messages.message %></td>
-          <td><%= link_to 'Show', messages %></td>
-          <td><%= link_to 'Destroy', messages, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+        <br>
+        
+    </div>
 
-  <br>
-
-  <%= link_to('Nachricht schreiben', new_message_path, class: 'btn btn-default') %>
+</div>
+<%= link_to 'Nachricht schreiben', new_message_path, style:'color:#FFFFFF', class: 'btn btn-primary btn-sm'%>
+  
 </div>
