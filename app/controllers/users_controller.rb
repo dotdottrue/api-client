@@ -76,9 +76,10 @@ class UsersController < ApplicationController
     if response.code === 200
       Message.where(sender: current_user.name).destroy
       Inbox.where(recipient: current_user.name).destroy
+      current_user = nil
       @user.destroy
       respond_to do |format|
-        format.html { redirect_to '', notice: 'Benutzer wurde gelöscht.' }
+        format.html { redirect_to root_path, notice: 'Benutzer wurde gelöscht.' }
         format.json { head :no_content }
       end
     else
