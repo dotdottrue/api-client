@@ -74,6 +74,8 @@ class UsersController < ApplicationController
     response = HTTParty.get("http://#{$SERVER_IP}/#{current_user.name}/delete")
     @user = User.find(current_user.id)
     if response.code === 200
+      Message.where(sender: current_user.name).destroy
+      Inbox.where(recipient: current_user.name).destroy
       @user.destroy
       respond_to do |format|
         format.html { redirect_to '', notice: 'Benutzer wurde gelöscht.' }
