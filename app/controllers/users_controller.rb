@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :edit, :update, :destroy]
+  before_action :set_user, only: [:show, :edit, :update]
 
   def index
     @users = User.all
@@ -56,18 +56,6 @@ class UsersController < ApplicationController
       flash[:notice] = "Benutzer konnte nicht angelegt werden."
       redirect_to new_user_path
     end
-
-    # respond_to do |format|
-    #   if @user.present?
-    #   #add status codes etc
-    #     format.html { redirect_to @user, notice: 'User was successfully created.' }
-    #     format.json { render :show, status: :ok, location: @user }
-    #   else
-    #     #fehler beim erstellen des Users
-    #     format.html { render :new }
-    #     format.json { render json: @user.errors, status: :unprocessable_entity }
-    #   end
-    # end
   end
 
   def update
@@ -83,10 +71,16 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    @user.destroy
-    respond_to do |format|
-      format.html { redirect_to users_url, notice: 'User was successfully destroyed.' }
-      format.json { head :no_content }
+    response = HTTParty.get("http://#{$SERVER_IP}/#{current_user.name}/delete")
+    @user = User.find(current_user.id)
+    if response.code === 200
+      @user.destroy
+      respond_to do |format|
+        format.html { redirect_to '', notice: 'Benutzer wurde gelöscht.' }
+        format.json { head :no_content }
+      end
+    else
+      redirect_to messages_url, :notice => "Aufgrund eines serverinternen Fehlers konnte der Benutzer nicht gelöscht werden."
     end
   end
 

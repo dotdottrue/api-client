@@ -30,7 +30,7 @@ class UserSessionController < ApplicationController
         $privkey_user = OpenSSL::PKey::RSA.new(privkey_user_enc, masterkey)
 
         flash[:notice] = "Statuscode: 200, Nachricht: Benutzerdaten wurden abgerufen."
-        redirect_to messages_url, :notice => "Willkommen, #{@user.name}"  
+        redirect_to messages_url, :notice => "Willkommen, #{@user.name}"
   	  else
         redirect_to root_url, :notice => "Nachricht: Benutzerdaten konnte nicht abgerufen werden!"
       end

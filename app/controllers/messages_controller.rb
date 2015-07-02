@@ -69,9 +69,6 @@ class MessagesController < ApplicationController
     sig_service = CryptoMessenger::Message.create_sig_service( current_user.name.to_s, encrypted_message.to_s, @iv.to_s, key_recipient_enc.to_s, sig_recipient.to_s, timestamp.to_s, @message.recipient.to_s)
 
     response = CryptoMessenger::Message.send_message(current_user.name, encrypted_message, @iv, key_recipient_enc, sig_recipient, timestamp, @message.recipient, sig_service)
-  
-
-    
     
       respond_to do |format|
         if response.code === 200

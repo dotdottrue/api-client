@@ -5,7 +5,9 @@ Rails.application.routes.draw do
 
   get 'logout' => 'user_session#destroy', :as => 'log_out'
 
-  resources :users
+  get 'delete' => 'users#destroy', :as => 'delete'
+
+  resources :users 
 
   resources :messages
 
