@@ -23,9 +23,7 @@ class MessagesController < ApplicationController
           message["cipher"] = CryptoMessenger::Message.decrypt(message)
 
           new_message = Inbox.new(sender: message["sender"], message: message["cipher"], recipient: current_user.name)
-          if new_message.save
-            #response = HTTParty.get("http://#{$SERVER_IP}/delete_message/#{message["id"]}")
-          end
+          new_message.save
 
           puts "#####################################################"
           puts message["cipher"]

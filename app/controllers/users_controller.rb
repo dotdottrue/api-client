@@ -52,12 +52,7 @@ class UsersController < ApplicationController
                            }
                           }.to_json,
                 :headers => { 'Content-Type' => 'application/json'})
-      # if response.code === 200
-      #   flash[:notice] = "Statuscode: 200, Nachricht: Benutzer erfolgreich angelegt."
-      # elsif response.code === 500
-      #   flash[:notice] = "Statuscode: 500, Nachricht: Interner Serverfehler."
-      #   User.destroy(@user.name)
-      # end
+
     if response.code === 201 
       @user.save
       redirect_to ''
@@ -73,22 +68,8 @@ class UsersController < ApplicationController
         redirect_to new_user_path
       end
     end
-
-    # respond_to do |format|
-    #   if @user.present?
-    #   #add status codes etc
-    #     format.html { redirect_to @user, notice: 'User was successfully created.' }
-    #     format.json { render :show, status: :ok, location: @user }
-    #   else
-    #     #fehler beim erstellen des Users
-    #     format.html { render :new }
-    #     format.json { render json: @user.errors, status: :unprocessable_entity }
-    #   end
-    # end
   end
 
-  # PATCH/PUT /users/1
-  # PATCH/PUT /users/1.json
   def update
     respond_to do |format|
       if @user.update(user_params)
@@ -101,8 +82,6 @@ class UsersController < ApplicationController
     end
   end
 
-  # DELETE /users/1
-  # DELETE /users/1.json
   def destroy
     @user.destroy
     respond_to do |format|
