@@ -73,18 +73,22 @@ class UsersController < ApplicationController
   def destroy
     response = HTTParty.get("http://#{$SERVER_IP}/#{current_user.name}/delete")
     @user = User.find(current_user.id)
-    if response.code === 200
-      Message.where(sender: current_user.name).destroy
-      Inbox.where(recipient: current_user.name).destroy
-      current_user = nil
-      @user.destroy
-      respond_to do |format|
-        format.html { redirect_to root_path, notice: 'Benutzer wurde gelöscht.' }
-        format.json { head :no_content }
+    #if response.code === 200
+    if Message.where(sender: @user.name).exists?
+      Message.where(sender: @user.name).destroy_all
+      if Inbox.where(recipient: @user.name).exists?
+        Inbox.where(recipient: @user.name).destroy_all
       end
-    else
-      redirect_to messages_url, :notice => "Aufgrund eines serverinternen Fehlers konnte der Benutzer nicht gelöscht werden."
+      current_user = nil
     end
+    @user.destroy
+    respond_to do |format|
+      format.html { redirect_to root_path, notice: 'Benutzer wurde gelöscht.' }
+      format.json { head :no_content }
+    end
+    # else
+    #   redirect_to messages_url, :notice => "Aufgrund eines serverinternen Fehlers konnte der Benutzer nicht gelöscht werden."
+    # end
   end
 
   private
