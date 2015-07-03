@@ -5,10 +5,7 @@ class MessagesController < ApplicationController
 
   def index
     @user_messages = Message.where(sender: current_user.name)
-    puts "TESTTESTTEST"
-    puts current_user.name
-    puts @user_messages.to_json
-    puts "ENDEENDEENDE"
+
     @messages = get_messages
 
     if @messages.code === 200
